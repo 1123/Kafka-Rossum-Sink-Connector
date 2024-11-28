@@ -1,0 +1,4 @@
+# Intellij IDEA project directory and build out directory.
+.idea
+sample-connector.json
+target

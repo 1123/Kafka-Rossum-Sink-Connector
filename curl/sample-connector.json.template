@@ -1,0 +1,14 @@
+{
+  "name": "rossum-test-connector",
+  "config": {
+    "connector.class": "io.confluent.connectors.rossum.sink.RossumSinkConnector",
+    "tasks.max": "1",
+    "topics": "t1",
+    "rossum.username": "$ROSSUM_USER",
+    "rossum.password": "$ROSSUM_PASSWORD",
+    "rossum.company": "$ROSSUM_COMPANY",
+    "rossum.queue.id": "$ROSSUM_QUEUE_ID",
+    "key.converter": "org.apache.kafka.connect.converters.ByteArrayConverter",
+    "value.converter": "org.apache.kafka.connect.converters.ByteArrayConverter"
+  }
+}
