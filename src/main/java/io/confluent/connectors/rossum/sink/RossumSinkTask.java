@@ -38,7 +38,11 @@ public final class RossumSinkTask extends SinkTask {
     public void put(final Collection<SinkRecord> records) {
         log.debug("Received {} records", records.size());
         records.forEach(record -> {
-            rossumClient.uploadByteArray(queueId, (byte []) record.value());
+            try {
+                rossumClient.uploadByteArray(queueId, (byte []) record.value());
+            } catch (IOException | InterruptedException e) {
+                throw new RuntimeException(e);
+            }
         });
     }
 

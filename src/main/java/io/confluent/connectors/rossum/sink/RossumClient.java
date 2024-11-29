@@ -25,6 +25,7 @@ import java.util.List;
 public class RossumClient {
 
     private static final Logger log = LoggerFactory.getLogger(RossumClient.class);
+    public static final int KEY_REFRESH_INTERVAL = 1000 * 60 * 60;
 
     private final String userName;
     private final String password;
@@ -35,6 +36,7 @@ public class RossumClient {
     private final HttpClient httpClient = HttpClient.newHttpClient();
     @Getter
     private String key;
+    private long lastKeyUpdate;
 
     RossumClient(String userName, String password, String company)
             throws IOException, InterruptedException {
@@ -59,9 +61,13 @@ public class RossumClient {
         log.debug(response.body());
         final HashMap<String,String> mapping = new ObjectMapper().readValue(response.body(), HashMap.class);
         this.key = mapping.get("key");
+        lastKeyUpdate = System.currentTimeMillis();
     }
 
     public List<RossumQueue> getRossumQueues() throws IOException, InterruptedException {
+        if (System.currentTimeMillis() - lastKeyUpdate > KEY_REFRESH_INTERVAL) {
+            initializeKey();
+        }
         final String url = String.format(QUEUES_URL_PATTERN, company);
         final HttpRequest httpRequest = HttpRequest.newBuilder()
                 .header("Authorization", "Bearer " + key)
@@ -76,7 +82,11 @@ public class RossumClient {
         return rossumQueuesResponse.getResults();
     }
 
-    public UploadResult uploadByteArray(String queueId, byte[] content) {
+    public UploadResult uploadByteArray(String queueId, byte[] content) throws IOException, InterruptedException {
+        // TODO: it would be good not to create temporary files.
+        // Yet it seems the httpclient derives some information from the file and passes it to the api.
+        // It currently does not work without creating the temporary file.
+        log.info("Writing byte array to temporary file");
         File file = new File("tmp.png");
         FileOutputStream fileOutputStream = null;
         try {
@@ -99,7 +109,11 @@ public class RossumClient {
         return  result;
     }
 
-    public UploadResult uploadDocument(String queueId, String filePath) {
+    public UploadResult uploadDocument(String queueId, String filePath) throws IOException, InterruptedException {
+        log.info("Uploading document to queue: {}", queueId);
+        if (System.currentTimeMillis() - lastKeyUpdate > KEY_REFRESH_INTERVAL) {
+            initializeKey();
+        }
         try (DefaultHttpClient httpclient = new DefaultHttpClient()) {
             final HttpPost postRequest = new HttpPost(String.format(UPLOAD_URL_PATTERN, company, queueId));
             final File file = new File(filePath);
@@ -111,7 +125,7 @@ public class RossumClient {
             org.apache.http.HttpResponse httpResponse = httpclient.execute(postRequest);
             HttpEntity entity = httpResponse.getEntity();
             String responseString = EntityUtils.toString(entity, "UTF-8");
-            log.info(responseString);
+            log.info("upload response: {}", responseString);
             return new ObjectMapper().readValue(responseString, UploadResult.class);
         } catch(Exception e) {
             throw new RuntimeException(e);
