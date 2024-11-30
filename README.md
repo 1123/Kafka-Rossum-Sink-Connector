@@ -11,7 +11,7 @@ This is a Kafka Connect Sink Connector that allows exporting files from a Kafka 
 ## How to run this connector:
 * Create a Kafka Topic with name `t1`
 * Build the project: `mvn clean package -DskipTests`
-* Write some binary files (images, pdfs, scans, etc) to the the topic, via the main Method in the class `SampleDataProducer`.
+* Write some binary files (images, pdfs, scans, etc) to the topic, via the main Method in the class `SampleDataProducer`.
   * There is a shell script to help you: `./produce-sample-message.sh`
 * bring the distribution on the plugin path of Kafka Connect and unzip it
   * You may want to adapt the script `./build-and-install.sh` for this purpose
@@ -32,6 +32,35 @@ This is a Kafka Connect Sink Connector that allows exporting files from a Kafka 
   e.g. `curl localhost:8083/connectors/rossum-test-connector/status | jq`. 
   The connector should be in state `RUNNING` and the task should also be in state `RUNNING`.
 * Check that the data has been uploaded to Rossum.ai via the Rossum web interface.
+
+## Configuration Properties
+
+The following configuration properties are supported:
+
+* rossum.username: The username for the Rossum.ai account
+* rossum.password: The password for the Rossum.ai account
+* rossum.company: The company name for the Rossum.ai account
+* rossum.queue.id: The id of the queue to which the documents should be uploaded
+* topics: The Kafka topics from which the documents should be read
+
+The following JSON file is a sample configuration: 
+
+```
+{
+  "name": "rossum-test-connector",
+  "config": {
+    "connector.class": "io.confluent.connectors.rossum.sink.RossumSinkConnector",
+    "tasks.max": "1",
+    "topics": "t1",
+    "rossum.username": "me",
+    "rossum.password": "s3cret",
+    "rossum.company": "foo-bar-inc",
+    "rossum.queue.id": "987654",
+    "key.converter": "org.apache.kafka.connect.converters.ByteArrayConverter",
+    "value.converter": "org.apache.kafka.connect.converters.ByteArrayConverter"
+  }
+}
+```
 
 ## Contributing
 Contributions are very welcome. Please open an issue or a pull request.
