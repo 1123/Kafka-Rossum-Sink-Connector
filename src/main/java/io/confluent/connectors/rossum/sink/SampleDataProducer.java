@@ -28,7 +28,7 @@ public class SampleDataProducer {
         byte[] fileContent = null;
         try {
             ClassLoader classLoader = SampleDataProducer.class.getClassLoader();
-            File file = new File(classLoader.getResource("confluent-logo.png").getPath());
+            File file = new File(classLoader.getResource("invoice.jpg").getPath());
             FileInputStream fileInputStream = new FileInputStream(file);
             fileContent = fileInputStream.readAllBytes();
             fileInputStream.close();

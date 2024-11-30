@@ -49,7 +49,7 @@ public class RossumClientTest {
         final var queues = rossumClient.getRossumQueues();
         final var queueId = queues.get(0).getId();
         final ClassLoader classloader = Thread.currentThread().getContextClassLoader();
-        final URL resource = classloader.getResource("confluent-logo.png");
+        final URL resource = classloader.getResource("invoice.jpg");
         final String path = resource.getPath();
         UploadResult result = rossumClient.uploadDocument(queueId, path);
         log.info(new ObjectMapper().writeValueAsString(result));
@@ -58,7 +58,7 @@ public class RossumClientTest {
     @Test
     public void testUploadByteArray() throws IOException, InterruptedException {
         final ClassLoader classloader = Thread.currentThread().getContextClassLoader();
-        File file = new File(classloader.getResource("confluent-logo.png").getFile());
+        File file = new File(classloader.getResource("invoice.jpg").getFile());
         FileInputStream fileInputStream = new FileInputStream(file);
         final var queues = rossumClient.getRossumQueues();
         final var queueId = queues.get(0).getId();
